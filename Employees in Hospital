@@ -1,0 +1,36 @@
+create table hospital ( c_id int
+, action varchar(10)
+, time datetime);
+
+truncate table hospital;
+
+insert into hospital values ('1', 'in', '2019-12-22 09:00:00');
+insert into hospital values ('1', 'out', '2019-12-22 09:15:00');
+insert into hospital values ('2', 'in', '2019-12-22 09:00:00');
+insert into hospital values ('2', 'out', '2019-12-22 09:15:00');
+insert into hospital values ('2', 'in', '2019-12-22 09:30:00');
+insert into hospital values ('3', 'out', '2019-12-22 09:00:00');
+insert into hospital values ('3', 'in', '2019-12-22 09:15:00');
+insert into hospital values ('3', 'out', '2019-12-22 09:30:00');
+insert into hospital values ('3', 'in', '2019-12-22 09:45:00');
+insert into hospital values ('4', 'in', '2019-12-22 09:45:00');
+insert into hospital values ('5', 'out', '2019-12-22 09:40:00');
+
+-- 2
+-- 3
+-- 4
+
+-- Get the last actn for all Employees. Count where it's 'in'.
+with cte as (
+select distinct c_id, last_value(action) over (partition by c_id order by time range between unbounded preceding
+and unbounded following ) last_actn
+from hospital)
+select count(1) as num_customers from cte where last_actn='in';
+
+
+-- Rank the order of events for each Employees. Get the last actn where it's 'in'
+with cte as 
+(select c_id,action, time, rank() over (partition by c_id order by time desc) rnk from hospital)
+select count(1) as num_customers from cte where rnk=1 and action='in'
+
+
