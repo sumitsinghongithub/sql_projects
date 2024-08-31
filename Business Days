@@ -1,0 +1,37 @@
+%sql
+create table tickets
+(
+ticket_id varchar(10),
+create_date date,
+resolved_date date
+);
+delete from tickets;
+insert into tickets values
+(1,'2022-08-01','2022-08-03')
+,(2,'2022-08-01','2022-08-12')
+,(3,'2022-08-01','2022-08-16');
+create table holidays
+(
+holiday_date date
+,reason varchar(100)
+);
+delete from holidays;
+insert into holidays values
+('2022-08-11','Rakhi'),('2022-08-15','Independence day');
+
+-- Solution
+
+SELECT DISTINCT 
+resolved_date,
+create_date,
+CASE 
+WHEN holiday_date IS NOT NULL 
+THEN 
+/*getting holiday count*/
+COUNT(1) OVER (PARTITION BY resolved_date,create_date) + 2 * (week(resolved_date) - week(create_date))
+ELSE 
+week(resolved_date) - week(create_date)
+END AS business_days
+FROM TICKETS LEFT join holidays 
+on TICKETS.resolved_date >= holidays.holiday_date 
+AND TICKETS.create_date <= holidays.holiday_date;
